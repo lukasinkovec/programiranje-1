@@ -26,6 +26,14 @@ medved. Zvrhano zibelko sladkih hrušk mi je prinesel za en sam izdrt trn"."""
 # {'izdere', 'debel', 'oddide', 'začudeno'}
 ###############################################################################
 
+import re
+
+def find_words(niz, podniz):
+    vzorec = r"\b\w*" + podniz + r"\w*\b"
+    seznam = []
+    for ujemanje in re.finditer(vzorec, niz):
+        seznam.append(ujemanje.group(0))
+    return set(seznam)
 
 ###############################################################################
 # 2) Sestavite funkcijo [find_prefix], ki vrne množico vseh besed, ki se
@@ -35,6 +43,12 @@ medved. Zvrhano zibelko sladkih hrušk mi je prinesel za en sam izdrt trn"."""
 # {'zibala', 'zibel', 'zibelko'}
 ###############################################################################
 
+def find_prefix(niz, podniz):
+    vzorec = r"\b" + podniz + r"\w*\b"
+    seznam = []
+    for ujemanje in re.finditer(vzorec, niz):
+        seznam.append(ujemanje.group(0))
+    return set(seznam)
 
 ###############################################################################
 # 3) Sestavite funkcijo [find_suffix], ki vrne množico vseh besed, ki se
@@ -44,6 +58,12 @@ medved. Zvrhano zibelko sladkih hrušk mi je prinesel za en sam izdrt trn"."""
 # {'zibala', 'razveselila', 'prestrašila', 'šivala', 'opazila', 'tla'}
 ###############################################################################
 
+def find_suffix(niz, podniz):
+    vzorec = r"\b\w*" + podniz + r"\b"
+    seznam = []
+    for ujemanje in re.finditer(vzorec, niz):
+        seznam.append(ujemanje.group(0))
+    return set(seznam)
 
 ###############################################################################
 # 4) Sestavite funkcijo [double_letters], ki sprejme niz in vrne množico vseh
@@ -52,3 +72,10 @@ medved. Zvrhano zibelko sladkih hrušk mi je prinesel za en sam izdrt trn"."""
 # >>> double_letters('A volunteer is worth twenty pressed men.')
 # {'volunteer', 'pressed'}
 ###############################################################################
+
+def double_letters(niz):
+    vzorec = r"\b\w*" + r"(\w)\1" + r"\w*\b"
+    seznam = []
+    for ujemanje in re.finditer(vzorec, niz):
+        seznam.append(ujemanje.group(0))
+    return set(seznam)
