@@ -59,32 +59,9 @@ def save_frontpage():
 
 def read_file_to_string(directory, filename):
     '''Return the contents of the file "directory"/"filename" as a string.'''
-    seznam = []
-    vzorec = re.compile(r'<div class="ad featured">'
-             r'<div class="coloumn image">'
-             r'<table><tr><td><a title="pasemska britanka britanke s FIFE slovenskim rodovnikom" href="http://www.bolha.com/bs/r/PUJoZUPNTx2kTSSOvY-4DfQ34DYYo_8gmvgNZm8TR7ocOTCVHhdNehVxiVSepVQJbvT78J3Nwv475wTT-vctJHk9Ud-Idp_MranJRWzUrxTsotLbcIzajrKqMKpRChQTJxRhiH1M3SJk-YfLgKbDe1VpeQTryul9jc5E5ZuXazkPgIuaw7ROv7b_P5Qz1ikG9yW9Hw0.?adId=1339050872&amp;clkType=organic&amp;dst=internal&amp;source=listing&amp;section=organic&amp;category=%C5%BDivali%2FMale+%C5%BEivali%2FMa%C4%8Dke%2FMa%C4%8Dke+z+rodovnikom%2F&amp;viewType=30&amp;action=imgClk&amp;target=adDetail&amp;redirectFrom=http://www.bolha.com/zivali/male-zivali/macke&amp;redirectTo=http://www.bolha.com//zivali/male-zivali/macke/macke-z-rodovnikom/pasemska-britanka-britanke-s-fife-slovenskim-rodovnikom-1339050872.html&amp;ts=1539595331"><img src="https://mmc.bolha.com/storage/2/thumb2/4f64/0bf0/pasemskabritankabritankesfifeslorodovnikom-1000.png" alt="pasemska britanka britanke s FIFE slovenskim rodovnikom" /></a></td></tr></table>'
-             r'<span class="flag_newAd"></span>                        </div>'
-             r'<div class="coloumn content">'
-             r'<h3><a title="pasemska britanka britanke s FIFE slovenskim rodovnikom" href="http://www.bolha.com/bs/r/PUJoZUPNTx2kTSSOvY-4DfQ34DYYo_8gmvgNZm8TR7ocOTCVHhdNehVxiVSepVQJbvT78J3Nwv475wTT-vctJHk9Ud-Idp_MranJRWzUrxTsotLbcIzajrKqMKpRChQTJxRhiH1M3SJk-YfLgKbDe1VpeQTryul9jc5E5ZuXazkPgIuaw7ROv7b_P5Qz1ikG9yW9Hw0.?adId=1339050872&amp;clkType=organic&amp;dst=internal&amp;source=listing&amp;section=organic&amp;category=%C5%BDivali%2FMale+%C5%BEivali%2FMa%C4%8Dke%2FMa%C4%8Dke+z+rodovnikom%2F&amp;viewType=30&amp;action=titleClk&amp;target=adDetail&amp;redirectFrom=http://www.bolha.com/zivali/male-zivali/macke&amp;redirectTo=http://www.bolha.com//zivali/male-zivali/macke/macke-z-rodovnikom/pasemska-britanka-britanke-s-fife-slovenskim-rodovnikom-1339050872.html&amp;ts=1539595331">pasemska britanka britanke s FIFE slovenskim rodovnikom</a></h3>'
-             r'pasma:britanska kratkodlaka barva /spol: crem bicolur samček skoten :23.8.2018, ime: Ike Kiki cattery *si oče: Lord Kiki cattery*si, modra mati: Haily                                                        <div class="additionalInfo"><span class="extraBadge"><a href="/pasemske-zivali">Z rodovnikom</a></span></div>                        </div>'
-             r'<div class="coloumn badges">'
-             r'&nbsp;                        </div>'
-             r'<div class="coloumn prices">'
-             r'<div class="price"><span>800,00 €</span></div>                        </div>'
-             r'<div class="clear"></div>'
-             r'<div class="miscellaneous">'
-             r'<div class="coloumn saveAd itemVisibility certifiedUserPosition">'
-             r'<a href="javascript:void(0);" data-id="1339050872" title="Shrani oglas" class="button btnYellow save _ad">Shrani oglas</a>'
-             r'</div>'
-             r'<p class="certifiedUserList"><a href="http://www.bolha.com/koristno/pomoc-in-varnost/preverjeni-uporabnik">Preverjeni uporabnik</a></p>'
-             r'<div>'
-             r'</div>'
-             r'<div class="clear"></div>'
-             r'</div>'
-             r'</div>', re.DOTALL)
-    for ujemanje in re.finditer(vzorec, frontpage_filename):
-        seznam.append(ujemanje.group(0))
-    return seznam
+    path = os.path.join(directory, filename)
+    with open(path, 'r') as file_in:
+        return file_in.read()
 
 # Definirajte funkcijo, ki sprejme niz, ki predstavlja vsebino spletne strani,
 # in ga razdeli na dele, kjer vsak del predstavlja en oglas. To storite s
@@ -94,7 +71,10 @@ def read_file_to_string(directory, filename):
 
 def page_to_ads(TODO):
     '''Split "page" to a list of advertisement blocks.'''
-    return TODO
+    rx = re.compile(r'<div class="ad">(.*?)<div class="clear">',
+                    re.DOTALL)
+    ads = re.findall(rx, page)
+    return ads
 
 # Definirajte funkcijo, ki sprejme niz, ki predstavlja oglas, in izlušči
 # podatke o imenu, ceni in opisu v oglasu.
@@ -103,7 +83,13 @@ def page_to_ads(TODO):
 def get_dict_from_ad_block(TODO):
     '''Build a dictionary containing the name, description and price
     of an ad block.'''
-    return TODO
+    rx = re.compile(r'title="(?P<name>.*?)"'
+                    r'.*?</h3>\s*(?P<description>.*?)\s*</?div'
+                    r'.*?class="price">(?P<price>.*?)</div',
+                    re.DOTALL)
+    data = re.search(rx, block)
+    ad_dict = data.groupdict()
+    return ad_dict
 
 # Definirajte funkcijo, ki sprejme ime in lokacijo datoteke, ki vsebuje
 # besedilo spletne strani, in vrne seznam slovarjev, ki vsebujejo podatke o
@@ -112,7 +98,13 @@ def get_dict_from_ad_block(TODO):
 
 def ads_from_file(TODO):
     '''Parse the ads in filename/directory into a dictionary list.'''
-    return TODO
+    page = read_file_to_string(filename, directory)
+    blocks = page_to_ads(page)
+    ads = [get_dict_from_ad_block(block) for block in blocks]
+    return ads
+
+def ads_frontpage():
+    return ads_from_file(cat_directory, frontpage_filename)
 
 ###############################################################################
 # Obdelane podatke želimo sedaj shraniti.
@@ -138,4 +130,10 @@ def write_csv(fieldnames, rows, directory, filename):
 
 
 def write_cat_ads_to_csv(TODO):
-    return TODO
+    '''Write a CSV file containing one ad from "ads" on each row.'''
+    write_csv(ads[0].keys(), ads, directory, filename)
+
+
+def write_cat_csv(ads):
+    '''Save "ads" to "cat_directory"/"csv_filename"'''
+    write_cat_ads_to_csv(ads, cat_directory, csv_filename)
