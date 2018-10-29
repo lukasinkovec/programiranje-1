@@ -10,7 +10,7 @@ import csv
 # definiratje URL glavne strani bolhe za oglase z mačkami
 cats_frontpage_url = 'http://www.bolha.com/zivali/male-zivali/macke/'
 # mapa, v katero bomo shranili podatke
-cat_directory = 'cat_data'
+cat_directory = '2-zajem-podatkov\\vaje\\cat_data'
 # ime datoteke v katero bomo shranili glavno stran
 frontpage_filename = 'frontpage.html'
 # ime CSV datoteke v katero bomo shranili podatke
@@ -69,7 +69,7 @@ def read_file_to_string(directory, filename):
 # oglasa. Funkcija naj vrne seznam nizov.
 
 
-def page_to_ads(TODO):
+def page_to_ads(page):
     '''Split "page" to a list of advertisement blocks.'''
     rx = re.compile(r'<div class="ad">(.*?)<div class="clear">',
                     re.DOTALL)
@@ -80,7 +80,7 @@ def page_to_ads(TODO):
 # podatke o imenu, ceni in opisu v oglasu.
 
 
-def get_dict_from_ad_block(TODO):
+def get_dict_from_ad_block(block):
     '''Build a dictionary containing the name, description and price
     of an ad block.'''
     rx = re.compile(r'title="(?P<name>.*?)"'
@@ -96,7 +96,7 @@ def get_dict_from_ad_block(TODO):
 # vseh oglasih strani.
 
 
-def ads_from_file(TODO):
+def ads_from_file(filename, directory):
     '''Parse the ads in filename/directory into a dictionary list.'''
     page = read_file_to_string(filename, directory)
     blocks = page_to_ads(page)
@@ -129,7 +129,7 @@ def write_csv(fieldnames, rows, directory, filename):
 # stolpce [fieldnames] pridobite iz slovarjev.
 
 
-def write_cat_ads_to_csv(TODO):
+def write_cat_ads_to_csv(ads, directory, filename):
     '''Write a CSV file containing one ad from "ads" on each row.'''
     write_csv(ads[0].keys(), ads, directory, filename)
 
