@@ -154,7 +154,11 @@ let is_palindrome seznam =
  - : int list = [5; 4; 3; 3; 4]
 [*----------------------------------------------------------------------------*)
 
-let rec max_on_components = ()
+let rec max_on_components sez1 sez2 = 
+  match sez1, sez2 with
+  | [], _ -> []
+  | _, [] -> []
+  | x :: xs, y :: ys -> max x y :: max_on_components xs ys
 
 (*----------------------------------------------------------------------------*]
  Funkcija [second_largest] vrne drugo največjo vrednost v seznamu. Pri tem se
@@ -166,4 +170,8 @@ let rec max_on_components = ()
  - : int = 10
 [*----------------------------------------------------------------------------*)
 
-let rec second_largest = ()
+let second_largest seznam =
+  let rec najvecji_element = function
+    | [] -> 0
+    | x :: xs -> max x najvecji_element xs in
+  najvecji_element (remove (najvecji_element seznam) seznam)
