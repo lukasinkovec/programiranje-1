@@ -12,7 +12,7 @@
 let rec penultimate_element = function
   | [] | _ :: [] -> failwith "Seznam je prekratek!"
   | x :: _ :: [] -> x
-  | _ :: x :: xs -> penultimate_element (x :: xs)
+  | _ :: xs -> penultimate_element xs
 
 (*----------------------------------------------------------------------------*]
  Funkcija [get k list] poišče [k]-ti element v seznamu [list]. Številčenje
@@ -25,7 +25,7 @@ let rec penultimate_element = function
 
 let rec get k = function
   | [] -> failwith "Seznam je prekratek!"
-  | x :: _ when k <= 0 -> x
+  | x :: _ when (k <= 0) -> x
   | _ :: xs -> get (k - 1) xs
 
 (*----------------------------------------------------------------------------*]
@@ -50,11 +50,10 @@ let rec double = function
  - : int list * int list = ([1; 2; 3; 4; 5], [])
 [*----------------------------------------------------------------------------*)
 
-let rec divide k seznam =
-  match k, seznam with
-  | k, seznam when (k <= 0) -> ([], seznam)
-  | _, [] -> ([], [])
-  | k, x :: xs ->
+let rec divide k = function
+  | seznam when (k <= 0) -> ([], seznam)
+  | [] -> ([], [])
+  | x :: xs ->
     let (levi_del, desni_del) = divide (k - 1) xs in
     (x :: levi_del, desni_del)
 
@@ -68,7 +67,12 @@ let rec divide k seznam =
 
 let rec delete k = function
   | [] -> failwith "Seznam je prekratek!"
-  | _ :: xs when (k <= 0) -> xs
+  | seznam when (k < 0) -> 
+    let rec obrni_seznam = function
+      | [] -> []
+      | x :: xs -> obrni_seznam xs @ [x] in
+      obrni_seznam (delete (- k - 1) (obrni_seznam seznam))
+  | _ :: xs when (k = 0) -> xs
   | x :: xs -> x :: delete (k - 1) xs
 
 (*----------------------------------------------------------------------------*]
@@ -80,12 +84,11 @@ let rec delete k = function
  - : int list = [1; 2; 3]
 [*----------------------------------------------------------------------------*)
 
-let rec slice i k seznam = 
-  match i, k, seznam with
-  | 0, k, seznam -> 
+let rec slice i k = function
+  | seznam when (i = 0) -> 
   let (levi_del, desni_del) = divide k seznam in 
   levi_del
-  | i, k, x :: xs -> slice (i - 1) (k - 1) xs
+  | x :: xs -> slice (i - 1) (k - 1) xs
 
 (*----------------------------------------------------------------------------*]
  Funkcija [insert x k list] na [k]-to mesto seznama [list] vrine element [x].
@@ -97,10 +100,9 @@ let rec slice i k seznam =
  - : int list = [1; 0; 0; 0; 0; 0]
 [*----------------------------------------------------------------------------*)
 
-let rec insert x k = function
-  | [] -> [x]
-  | seznam when (k <= 0) -> x :: seznam
-  | y :: ys -> y :: insert x (k - 1) ys
+let insert x k seznam =
+  let (levi_del, desni_del) = divide k seznam in
+  levi_del @ (x :: desni_del)
 
 (*----------------------------------------------------------------------------*]
  Funkcija [rotate n list] seznam zavrti za [n] mest v levo. Predpostavimo, da
@@ -110,11 +112,9 @@ let rec insert x k = function
  - : int list = [3; 4; 5; 1; 2]
 [*----------------------------------------------------------------------------*)
 
-let rec rotate n seznam =
-  match n, seznam with
-  | 0, seznam -> seznam 
-  | 1, x :: xs -> xs @ [x]
-  | n, x :: xs -> rotate (n - 1) (xs @ [x] )
+let rotate n seznam =
+  let (levi_del, desni_del) = divide n seznam in
+  desni_del @ levi_del
 
 (*----------------------------------------------------------------------------*]
  Funkcija [remove x list] iz seznama izbriše vse pojavitve elementa [x].
@@ -123,11 +123,10 @@ let rec rotate n seznam =
  - : int list = [2; 3; 2; 3]
 [*----------------------------------------------------------------------------*)
 
-let rec remove x seznam =
-  match x, seznam with
-  | _, [] -> []
-  | x, y :: ys when (x = y) -> remove x ys
-  | x, y :: ys -> y :: remove x ys
+let rec remove x = function
+  | [] -> []
+  | y :: ys when (x = y) -> remove x ys
+  | y :: ys -> y :: remove x ys
 
 (*----------------------------------------------------------------------------*]
  Funkcija [is_palindrome] za dani seznam ugotovi ali predstavlja palindrom.
@@ -156,8 +155,7 @@ let is_palindrome seznam =
 
 let rec max_on_components sez1 sez2 = 
   match sez1, sez2 with
-  | [], _ -> []
-  | _, [] -> []
+  | _, _ when (min sez1 sez2 = []) -> []
   | x :: xs, y :: ys -> max x y :: max_on_components xs ys
 
 (*----------------------------------------------------------------------------*]
@@ -170,8 +168,9 @@ let rec max_on_components sez1 sez2 =
  - : int = 10
 [*----------------------------------------------------------------------------*)
 
-let second_largest seznam =
-  let rec najvecji_element = function
-    | [] -> 0
-    | x :: xs -> max x najvecji_element xs in
-  najvecji_element (remove (najvecji_element seznam) seznam)
+let drugi_najvecji seznam =
+  let rec prvi_najvecji = function
+    | [] -> failwith "Seznam je prekratek!"
+    | x :: [] -> x
+    | x :: xs -> max x (prvi_najvecji xs) in
+    prvi_najvecji (remove (prvi_najvecji seznam) seznam)
