@@ -150,7 +150,11 @@ zip_enum_tlrec' sez1 sez2 0 []
  - : int list * string list = ([0; 1; 2], ["a"; "b"; "c"])
 [*----------------------------------------------------------------------------*)
 
-let rec unzip = ()
+let rec unzip = function
+  | [] -> ([], [])
+  | x :: xs ->
+    match unzip xs with
+    | (sez1, sez2) -> (fst x :: sez1, snd x :: sez2)
 
 (*----------------------------------------------------------------------------*]
  Funkcija [unzip_tlrec] je repno rekurzivna različica funkcije [unzip].
@@ -159,7 +163,16 @@ let rec unzip = ()
  - : int list * string list = ([0; 1; 2], ["a"; "b"; "c"])
 [*----------------------------------------------------------------------------*)
 
-let rec unzip_tlrec = ()
+let rec unzip_tlrec sez =
+  let rec unzip_tlrec' acc1 acc2 = function
+  | [] -> (reverse acc1, reverse acc2)
+  | x :: xs ->
+    let new_acc1 = fst x :: acc1
+    and new_acc2 = snd x :: acc2
+    in
+    unzip_tlrec' new_acc1 new_acc2 xs
+  in
+  unzip_tlrec' [] [] sez
 
 (*----------------------------------------------------------------------------*]
  Funkcija [fold_left_no_acc f list] sprejme seznam [x0; x1; ...; xn] in
@@ -171,7 +184,10 @@ let rec unzip_tlrec = ()
  - : string = "FICUS"
 [*----------------------------------------------------------------------------*)
 
-let rec fold_left_no_acc = ()
+let rec fold_left_no_acc f = function
+  | [] | [_] -> failwith "Seznam je prekratek."
+  | [x1; x2] -> f x1 x2
+  | x :: xs -> f x (fold_left_no_acc f xs)
 
 (*----------------------------------------------------------------------------*]
  Funkcija [apply_sequence f x n] vrne seznam zaporednih uporab funkcije [f] na
@@ -185,7 +201,17 @@ let rec fold_left_no_acc = ()
  - : int list = []
 [*----------------------------------------------------------------------------*)
 
-let rec apply_sequence = ()
+let rec apply_sequence f x n =
+  let rec apply_sequence' f x n acc =
+    if n < 0 then
+      []
+    else if n = 0 then
+      reverse acc
+    else
+      let new_acc = f x :: acc in
+      apply_sequence' f (f x) (n - 1) new_acc
+  in
+  apply_sequence' f x n [x]
 
 (*----------------------------------------------------------------------------*]
  Funkcija [filter f list] vrne seznam elementov [list], pri katerih funkcija [f]
@@ -195,7 +221,17 @@ let rec apply_sequence = ()
  - : int list = [4; 5]
 [*----------------------------------------------------------------------------*)
 
-let rec filter = ()
+let rec filter f list =
+  let rec filter' acc f = function
+    | [] -> reverse acc
+    | x :: xs ->
+      if f x then
+        let new_acc = x :: acc in
+        filter' new_acc f xs
+      else
+        filter' acc f xs
+  in
+  filter' [] f list
 
 (*----------------------------------------------------------------------------*]
  Funkcija [exists] sprejme seznam in funkcijo, ter vrne vrednost [true] čim
@@ -208,7 +244,17 @@ let rec filter = ()
  - : bool = false
 [*----------------------------------------------------------------------------*)
 
-let rec exists = ()
+let rec exists =
+  let rec filter' acc f = function
+    | [] -> reverse acc
+    | x :: xs ->
+      if f x then
+        let new_acc = x :: acc in
+        filter' new_acc f xs
+      else
+        filter' acc f xs
+  in
+  filter' [] f list
 
 (*----------------------------------------------------------------------------*]
  Funkcija [first f default list] vrne prvi element seznama, za katerega
