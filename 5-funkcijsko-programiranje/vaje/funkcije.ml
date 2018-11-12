@@ -244,17 +244,13 @@ let rec filter f list =
  - : bool = false
 [*----------------------------------------------------------------------------*)
 
-let rec exists =
-  let rec filter' acc f = function
-    | [] -> reverse acc
-    | x :: xs ->
-      if f x then
-        let new_acc = x :: acc in
-        filter' new_acc f xs
-      else
-        filter' acc f xs
-  in
-  filter' [] f list
+let rec exists f = function
+  | [] -> false
+  | x :: xs ->
+    if f x then
+      true
+    else
+      exists f xs
 
 (*----------------------------------------------------------------------------*]
  Funkcija [first f default list] vrne prvi element seznama, za katerega
@@ -267,4 +263,10 @@ let rec exists =
  - : int = 0
 [*----------------------------------------------------------------------------*)
 
-let rec first = ()
+let rec first f default = function
+  | [] -> default
+  | x :: xs ->
+    if f x then
+      x
+    else
+      first f default xs
