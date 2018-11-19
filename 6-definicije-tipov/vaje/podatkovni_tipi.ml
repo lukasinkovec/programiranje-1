@@ -1,4 +1,4 @@
-(* ========== Vaja 3: Definicije Tipov  ========== *)
+             (* ========== Vaja 3: Definicije Tipov  ========== *)
 
 (*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*]
  Pri modeliranju denarja ponavadi uporabljamo racionalna števila. Problemi se
@@ -21,7 +21,16 @@
  - : euro = Euro 0.4305
 [*----------------------------------------------------------------------------*)
 
+type euro = Euro of float
+type dollar = Dollar of float
 
+let euro_to_dollar_bad e = 1.13 *. e
+
+let euro_to_dollar_good (Euro e) = Dollar (1.13 *. e)
+
+let dollar_to_euro_bad d = 0.88 *. d
+
+let dollar_to_euro_good (Dollar d) = Euro (0.88 *. d)
 
 (*----------------------------------------------------------------------------*]
  Definirajte tip [currency] kot en vsotni tip z konstruktorji za jen, funt
@@ -35,7 +44,15 @@
  - : currency = Pound 0.007
 [*----------------------------------------------------------------------------*)
 
+type currency = 
+  | Yen of float
+  | Pound of float
+  | Crown of float
 
+let to_pound = function
+  | Yen y -> Pound (0.01 *. y)
+  | Pound p -> Pound p
+  | Crown c -> Pound (0.09 *. c)
 
 (*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*]
  Želimo uporabljati sezname, ki hranijo tako cela števila kot tudi logične
@@ -57,7 +74,10 @@
  Nato napišite testni primer, ki bi predstavljal "[5; true; false; 7]".
 [*----------------------------------------------------------------------------*)
 
-
+type intbool_list =
+  | Empty
+  | Int_value of int * intbool_list
+  | Bool_value of bool * intbool_list
 
 (*----------------------------------------------------------------------------*]
  Funkcija [intbool_map f_int f_bool ib_list] preslika vrednosti [ib_list] v nov
