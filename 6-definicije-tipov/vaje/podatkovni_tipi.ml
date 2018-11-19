@@ -80,6 +80,8 @@ type intbool_list =
   | Int_value of int * intbool_list
   | Bool_value of bool * intbool_list
 
+let testni_primer = (Int_value(5, Bool_value(true, Bool_value(false, Int_value(7, Empty)))))
+
 (*----------------------------------------------------------------------------*]
  Funkcija [intbool_map f_int f_bool ib_list] preslika vrednosti [ib_list] v nov
  [intbool_list] seznam, kjer na elementih uporabi primerno od funkcij [f_int]
@@ -168,6 +170,8 @@ type status =
 
 type wizard = {name : string; status : status}
 
+let professor = {name = "Matija"; status = Employed (Fire, Teacher)}
+
 (*----------------------------------------------------------------------------*]
  Želimo prešteti koliko uporabnikov posamezne od vrst magije imamo na akademiji.
  Definirajte zapisni tip [magic_counter], ki v posameznem polju hrani število
@@ -195,17 +199,15 @@ let rec update counter = function
 [*----------------------------------------------------------------------------*)
 
 let rec count_magic wizard_list =
-  let rec count_magic' acc1 acc2 acc3 = function
-    | [] -> {fire = acc1; frost = acc2; arcane = acc3}
+  let rec count_magic' acc = function
+    | [] -> acc
     | x :: xs ->
-      let rec f wizard =
-        begin match wizard.status with
-        | Newbie -> 
-        | Student(, )
-        | Employed (, )
-        end
+      begin match x.status with
+      | Newbie -> count_magic' acc xs
+      | Student(magija, _) | Employed(magija, _) -> count_magic' (update acc magija) xs
+      end
   in
-  count_magic' 0 0 0 wizard_list 
+  count_magic' {fire = 0; frost = 0; arcane = 0} wizard_list 
 
 (*----------------------------------------------------------------------------*]
  Želimo poiskati primernega kandidata za delovni razpis. Študent lahko postane
@@ -221,4 +223,17 @@ let rec count_magic wizard_list =
  - : string option = Some "Jaina"
 [*----------------------------------------------------------------------------*)
 
-let rec find_candidate = ()
+type 'a option = None | Some of 'a
+
+let rec specializacija_v_leta = function
+  | Historian -> 3
+  | Researcher -> 4
+  | Teacher -> 5
+ 
+let rec find_candidate magic specialisation = function
+  | [] -> None
+  | x :: xs ->
+    begin match x.status with
+    | Newbie | Employed(_, _) -> find_candidate magic specialisation xs
+    | Student(magija, leta) -> if ((magija = magic) && (leta >= (specializacija_v_leta specialisation))) then Some x.name else find_candidate magic specialisation xs
+    end
