@@ -233,13 +233,25 @@ let pred = function
 [*----------------------------------------------------------------------------*)
 
 let rec delete_succ x = function
-  | 
-  | 
+  | Empty -> Empty
+  | Node (lt, y, rt) -> 
+    if x = y then
+      Node (lt, succ y, delete_succ (succ y) rt)
+    else if x > y then
+      Node (lt, y, delete_succ x rt)
+    else
+      Node (delete_succ x lt, y, rt)
 
 let rec delete_pred x = function
-  | 
-  | 
-
+  | Empty -> Empty
+  | Node (lt, y, rt) -> 
+    if x = y then
+      Node (delete_pred (pred y) lt, pred y, rt)
+    else if x > y then
+      Node (lt, y, delete_pred x rt)
+    else
+      Node (delete_pred x lt, y, rt)
+  
 (*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*]
  SLOVARJI
 
@@ -251,7 +263,7 @@ let rec delete_pred x = function
  vrednosti, ga parametriziramo kot [('key, 'value) dict].
 [*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*)
 
-type 'key * 'value dict = Empty | Dict of ('key * 'value) dict * ('key * 'value) * ('key * 'value) dict
+type ('key, 'value) dict = Empty | Dict of ('key, 'value) dict * ('key * 'value) * ('key, 'value) dict
 
 (*----------------------------------------------------------------------------*]
  Napišite testni primer [test_dict]:
@@ -279,6 +291,15 @@ let test_dict =
  - : int option = Some (-2)
 [*----------------------------------------------------------------------------*)
 
+let rec dict_get key = function
+  | Empty -> None
+  | Dict (ld, (k, v), rd) -> 
+    if k = key then
+      Some v
+    else if key > k then
+      dict_get key rd
+    else
+      dict_get key ld
       
 (*----------------------------------------------------------------------------*]
  Funkcija [print_dict] sprejme slovar s ključi tipa [string] in vrednostmi tipa
@@ -296,6 +317,18 @@ let test_dict =
  - : unit = ()
 [*----------------------------------------------------------------------------*)
 
+let print_dict dict =
+  let rec print_dict' f g = function
+    | Empty -> ()
+    | Dict (ld, (k, v), rd) -> 
+      print_dict' f g ld;
+      f k;
+      print_string " : ";
+      g v;
+      print_endline "";
+      print_dict' f g rd;
+  in
+  print_dict' print_string print_int dict
 
 (*----------------------------------------------------------------------------*]
  Funkcija [dict_insert key value dict] v slovar [dict] pod ključ [key] vstavi
@@ -316,3 +349,12 @@ let test_dict =
  - : unit = ()
 [*----------------------------------------------------------------------------*)
 
+let rec dict_insert key value = function
+  | Empty -> leaf_dict (key, value)
+  | Dict (ld, (k, v), rd) -> 
+    if k = key then
+      Dict (ld, (k, value), rd)
+    else if key > k then
+      Dict (ld, (k, v), dict_insert key value rd)
+    else
+      Dict (dict_insert key value ld, (k, v), rd)
