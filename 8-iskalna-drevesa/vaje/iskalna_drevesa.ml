@@ -265,7 +265,7 @@ type 'key * 'value dict = Empty | Dict of ('key * 'value) dict * ('key * 'value)
 let leaf_dict x = Dict (Empty, x, Empty)
 
 let test_dict =
-  let ld = leaf_dict ("b", 1) in
+  let ld = leaf_dict ("a", 0) in
   let rd = Dict (leaf_dict ("c", -2), ("d", 2), Empty) in
   Dict (ld, ("b", 1), rd)
 
