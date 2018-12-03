@@ -6,6 +6,7 @@
  poddrevesi. Na tej točki ne predpostavljamo ničesar drugega o obliki dreves.
 [*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*)
 
+type 'a tree =  Empty | Node of 'a tree * 'a * 'a tree
 
 (*----------------------------------------------------------------------------*]
  Definirajmo si testni primer za preizkušanje funkcij v nadaljevanju. Testni
@@ -17,10 +18,6 @@
        /   / \
       0   6   11
 [*----------------------------------------------------------------------------*)
-
-type a' tree = 
-  | Empty
-  | Node of a' tree * a' * a' tree
 
 let leaf x = Node (Empty, x, Empty)
 
@@ -59,7 +56,7 @@ let rec mirror = function
 
 let rec height = function
   | Empty -> 0
-  | Node (lt, _, rt) -> 1 + max (height lt, height rt)
+  | Node (lt, _, rt) -> 1 + max (height lt) (height rt)
 
 let rec size = function
   | Empty -> 0
@@ -75,7 +72,7 @@ let tl_rec_size tree =
       | Node (lt, _, rt) -> 
         let new_acc = acc + 1 in
         let new_queue = lt :: rt :: ts in
-        tl_rec_size new_acc new_queue
+        tl_rec_size' new_acc new_queue
     )
     in
     tl_rec_size' 0 [tree]
@@ -117,20 +114,19 @@ let rec list_of_tree = function
  - : bool = false
 [*----------------------------------------------------------------------------*)
 
+type 'a option = None | Some of 'a
+
 let is_sorted list = 
     let rec is_sorted' acc = function
       | [] -> true
       | x :: xs -> 
-        if x >= acc then
-          let new_acc = x in
+        if Some x >= acc then
+          let new_acc = Some x in
           is_sorted' new_acc xs
         else
           false
-    and first = function
-      | [] -> 0
-      | x :: _ -> x
     in
-    is_sorted' (first list) list
+    is_sorted' None list
 
 let is_bst tree = is_sorted (list_of_tree tree)
 
@@ -151,7 +147,7 @@ let is_bst tree = is_sorted (list_of_tree tree)
 let rec insert x = function
   | Empty -> leaf x
   | Node (lt, y, rt) -> 
-    if y > x then
+    if x > y then
       Node (lt, y, insert x rt)
     else
       Node (insert x lt, y, rt )
@@ -161,7 +157,7 @@ let rec member x = function
   | Node (lt, y, rt) -> 
     if x = y then
       true
-    else if x > y
+    else if x > y then
       member x rt
     else
       member x lt
@@ -179,7 +175,7 @@ let rec member2 x = function
     if x = y then
       true
     else
-     (member2 x lt) || (member2 x rt)
+      (member2 x lt) || (member2 x rt)
 
 (*----------------------------------------------------------------------------*]
  Funkcija [succ] vrne naslednjika korena danega drevesa, če obstaja. Za drevo
@@ -194,11 +190,33 @@ let rec member2 x = function
  - : int option = None
 [*----------------------------------------------------------------------------*)
 
-type 'a option = None | Some of 'a
+let min_tree tree =
+  let rec min_tree' acc = function
+  | [] -> acc
+  | x :: xs -> 
+    if acc = None then
+      let new_acc = Some x in
+      min_tree' new_acc xs
+    else
+      let new_acc = min (Some x) acc in
+      min_tree' new_acc xs
+  in
+  min_tree' None (list_of_tree tree)
 
-let succ tree =
+let max_tree tree =
+  let rec max_tree' = function
+  | [] -> None
+  | x :: xs -> max (Some x) (max_tree' xs)
+  in
+  max_tree' (list_of_tree tree)
 
-let rec pred tree =
+let succ = function
+  | Empty -> None
+  | Node (lt, _, rt) -> min_tree rt
+
+let pred = function
+  | Empty -> None
+  | Node (lt, _, rt) -> max_tree lt
 
 
 (*----------------------------------------------------------------------------*]
@@ -214,6 +232,13 @@ let rec pred tree =
  Node (Node (Empty, 6, Empty), 11, Empty))
 [*----------------------------------------------------------------------------*)
 
+let rec delete_succ x = function
+  | 
+  | 
+
+let rec delete_pred x = function
+  | 
+  | 
 
 (*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*]
  SLOVARJI
@@ -226,6 +251,7 @@ let rec pred tree =
  vrednosti, ga parametriziramo kot [('key, 'value) dict].
 [*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*)
 
+type 'key * 'value dict = Empty | Dict of ('key * 'value) dict * ('key * 'value) * ('key * 'value) dict
 
 (*----------------------------------------------------------------------------*]
  Napišite testni primer [test_dict]:
@@ -236,6 +262,12 @@ let rec pred tree =
      "c":-2
 [*----------------------------------------------------------------------------*)
 
+let leaf_dict x = Dict (Empty, x, Empty)
+
+let test_dict =
+  let ld = leaf_dict ("b", 1) in
+  let rd = Dict (leaf_dict ("c", -2), ("d", 2), Empty) in
+  Dict (ld, ("b", 1), rd)
 
 (*----------------------------------------------------------------------------*]
  Funkcija [dict_get key dict] v slovarju poišče vrednost z ključem [key]. Ker
