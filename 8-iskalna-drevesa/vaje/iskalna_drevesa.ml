@@ -212,11 +212,11 @@ let max_tree tree =
 
 let succ = function
   | Empty -> None
-  | Node (lt, _, rt) -> min_tree rt
+  | Node (_, _, rt) -> min_tree rt
 
 let pred = function
   | Empty -> None
-  | Node (lt, _, rt) -> max_tree lt
+  | Node (lt, _, _) -> max_tree lt
 
 
 (*----------------------------------------------------------------------------*]
@@ -234,9 +234,30 @@ let pred = function
 
 let rec delete_succ x = function
   | Empty -> Empty
+  | Node (Empty, y, Empty) ->
+    if x = y then
+      Empty
+    else
+      Node (Empty, y, Empty) 
+  | Node (lt, y, Empty) ->
+    if x = y then
+      lt
+    else if x > y then
+      Node (lt, y, Empty)
+    else
+      Node (delete_succ x lt, y, Empty) 
+  | Node (Empty, y, rt) ->
+    if x = y then
+      rt
+    else if x > y then
+      Node (Empty, y, delete_succ x rt) 
+    else
+      Node (Empty, y, rt)
   | Node (lt, y, rt) -> 
     if x = y then
-      Node (lt, succ y, delete_succ (succ y) rt)
+      let tree = Node (lt, y, rt) in
+      let Some y' = (succ tree) in
+      Node (lt, y', delete_succ y' rt)
     else if x > y then
       Node (lt, y, delete_succ x rt)
     else
@@ -244,14 +265,35 @@ let rec delete_succ x = function
 
 let rec delete_pred x = function
   | Empty -> Empty
+  | Node (Empty, y, Empty) ->
+    if x = y then
+      Empty
+    else
+      Node (Empty, y, Empty) 
+  | Node (lt, y, Empty) ->
+    if x = y then
+      lt
+    else if x > y then
+      Node (lt, y, Empty)
+    else
+      Node (delete_pred x lt, y, Empty) 
+  | Node (Empty, y, rt) ->
+    if x = y then
+      rt
+    else if x > y then
+      Node (Empty, y, delete_pred x rt)
+    else
+      Node (Empty, y, rt) 
   | Node (lt, y, rt) -> 
     if x = y then
-      Node (delete_pred (pred y) lt, pred y, rt)
+      let tree = Node (lt, y, rt) in
+      let Some y' = (pred tree) in
+      Node (delete_pred y' lt, y', rt)
     else if x > y then
       Node (lt, y, delete_pred x rt)
     else
       Node (delete_pred x lt, y, rt)
-  
+
 (*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*]
  SLOVARJI
 
@@ -294,7 +336,7 @@ let test_dict =
 let rec dict_get key = function
   | Empty -> None
   | Dict (ld, (k, v), rd) -> 
-    if k = key then
+    if key = k then
       Some v
     else if key > k then
       dict_get key rd
@@ -317,18 +359,14 @@ let rec dict_get key = function
  - : unit = ()
 [*----------------------------------------------------------------------------*)
 
-let print_dict dict =
-  let rec print_dict' f g = function
-    | Empty -> ()
-    | Dict (ld, (k, v), rd) -> 
-      print_dict' f g ld;
-      f k;
-      print_string " : ";
-      g v;
-      print_endline "";
-      print_dict' f g rd;
-  in
-  print_dict' print_string print_int dict
+let rec print_dict = function
+  | Empty -> ()
+  | Dict (ld, (k, v), rd) -> 
+    print_dict ld;
+    print_string (k ^ " : ");
+    print_int v;
+    print_endline "";
+    print_dict rd
 
 (*----------------------------------------------------------------------------*]
  Funkcija [dict_insert key value dict] v slovar [dict] pod ključ [key] vstavi
