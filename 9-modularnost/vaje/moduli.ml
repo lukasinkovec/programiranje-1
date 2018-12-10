@@ -53,9 +53,12 @@ module type NAT = sig
 
   val eq   : t -> t -> bool
   val zero : t
-  (* Dodajte manjkajoče! *)
-  (* val to_int : t -> int *)
-  (* val of_int : int -> t *)
+  val one  : t
+  val add  : t -> t -> t
+  val sub  : t -> t -> t
+  val mult : t -> t -> t
+  val to_int : t -> int
+  val of_int : int -> t
 end
 
 (*----------------------------------------------------------------------------*]
@@ -68,12 +71,16 @@ end
 [*----------------------------------------------------------------------------*)
 
 module Nat_int : NAT = struct
-
   type t = int
-  let eq x y = failwith "later"
-  let zero = 0
-  (* Dodajte manjkajoče! *)
 
+  let eq x y = (x = y)
+  let zero = 0
+  let one = 1
+  let add x y = x + y 
+  let sub x y = x - y
+  let mult x y = x * y
+  let to_int x = x
+  let of_int x = x
 end
 
 (*----------------------------------------------------------------------------*]
@@ -89,12 +96,43 @@ end
 [*----------------------------------------------------------------------------*)
 
 module Nat_peano : NAT = struct
+  type t = Zero | Succ of t
 
-  type t = unit (* To morate spremeniti! *)
-  let eq x y = failwith "later"
-  let zero = () (* To morate spremeniti! *)
-  (* Dodajte manjkajoče! *)
+  let rec eq x y = 
+    match x, y with
+    | Zero, Zero -> true
+    | Zero, _ | _, Zero -> false
+    | Succ x', Succ y' -> eq x' y'
+  
+  let zero = Zero
+  let one = Succ Zero
 
+  let rec add x y =
+    match x, y with
+    | Zero, Zero -> zero
+    | Zero, x' | x', Zero -> x'
+    | Succ x', Succ y' -> add x' Succ (Succ y')
+
+  let rec sub x y =
+    match x, y with
+    | Zero, _ -> zero
+    | x', Zero -> x'
+    | Succ x', Succ y' -> sub x' y'
+
+  let rec mult x y =
+    match x, y with
+    | Zero, _ | _, Zero -> zero
+    | Succ Zero, x' | x', Succ Zero -> x'
+    | Succ x', Succ y' -> add y' (mult x' Succ y')
+
+  let rec to_int = function
+    | Zero -> 0
+    | Succ x -> 1 + to_int x
+
+  let rec of_int = function
+    | 0 -> zero
+    | x -> Succ (of_int (x - 1))
+  
 end
 
 (*----------------------------------------------------------------------------*]
