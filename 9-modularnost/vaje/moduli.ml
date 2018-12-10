@@ -111,7 +111,7 @@ module Nat_peano : NAT = struct
     match x, y with
     | Zero, Zero -> zero
     | Zero, x' | x', Zero -> x'
-    | Succ x', Succ y' -> add x' Succ (Succ y')
+    | Succ x', Succ y' -> add x' (Succ (Succ y'))
 
   let rec sub x y =
     match x, y with
@@ -123,7 +123,7 @@ module Nat_peano : NAT = struct
     match x, y with
     | Zero, _ | _, Zero -> zero
     | Succ Zero, x' | x', Succ Zero -> x'
-    | Succ x', Succ y' -> add y' (mult x' Succ y')
+    | Succ x', Succ y' -> add y' (mult x' (Succ y'))
 
   let rec to_int = function
     | Zero -> 0
@@ -156,7 +156,15 @@ end
  - : int = 4950
 [*----------------------------------------------------------------------------*)
 
-let sum_nat_100 (module Nat : NAT) = ()
+let sum_nat_100 (module Nat : NAT) =
+  let rec sum_nat_100' acc1 acc2 = function
+    | 0 -> Nat.to_int acc2
+    | x ->
+      let new_acc2 = (Nat.add acc1 acc2) in
+      let new_acc1 = (Nat.add Nat.one acc1) in
+      sum_nat_100' new_acc1 new_acc2 (x - 1)
+  in
+  sum_nat_100' Nat.zero Nat.zero 100
 
 (*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*]
  Now we follow the fable told by John Reynolds in the introduction.
@@ -170,8 +178,15 @@ let sum_nat_100 (module Nat : NAT) = ()
 
 module type COMPLEX = sig
   type t
-  val eq : t -> t -> bool
-  (* Dodajte manjkajoče! *)
+
+  val eq   : t -> t -> bool
+  val zero : t
+  val one  : t
+  val i    : t
+  val neg  : t -> t
+  val con  : t -> t
+  val add  : t -> t -> t
+  val mult : t -> t -> t
 end
 
 (*----------------------------------------------------------------------------*]
@@ -180,12 +195,16 @@ end
 [*----------------------------------------------------------------------------*)
 
 module Cartesian : COMPLEX = struct
-
   type t = {re : float; im : float}
 
-  let eq x y = failwith "later"
-  (* Dodajte manjkajoče! *)
-
+  let eq x y = (x.re = y.re) && (x.im = y.im)
+  let zero = {re = 0.; im = 0.}
+  let one = {re = 1.; im = 0.}
+  let i = {re = 0.; im = 1.}
+  let neg x = {re = (-. x.re); im = (-. x.im)}
+  let con x = {re = x.re; im = (-. x.im)}
+  let add x y = {re = x.re +. y.re; im = x.im +. y.im} 
+  let mult x y = {re = (x.re *. y.re) -. (x.im *. y.im); im = (x.re *. y.im) +. (x.im *. y.re)}
 end
 
 (*----------------------------------------------------------------------------*]
@@ -197,7 +216,6 @@ end
 [*----------------------------------------------------------------------------*)
 
 module Polar : COMPLEX = struct
-
   type t = {magn : float; arg : float}
 
   (* Pomožne funkcije za lažje življenje. *)
@@ -205,9 +223,15 @@ module Polar : COMPLEX = struct
   let rad_of_deg deg = (deg /. 180.) *. pi
   let deg_of_rad rad = (rad /. pi) *. 180.
 
-  let eq x y = failwith "later"
-  (* Dodajte manjkajoče! *)
-
+  let eq x y = {magn = 0.; arg = 0.}
+  let zero = {magn = 0.; arg = 0.}
+  let one = {magn = 1.; arg = 0.}
+  let i = {magn = 1.; arg = pi / 2.}
+  let neg x = {magn = x.magn; arg = x.arg +. pi}
+  let con x = 
+    if x.arg > {magn = x.magn; arg = }
+  let add x y = {magn = 0.; arg = 0.} 
+  let mult x y = {magn = x.magn +. y.magn; arg = 0.}
 end
 
 (*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*]
@@ -236,4 +260,4 @@ end
  - : unit = ()
 [*----------------------------------------------------------------------------*)
 
-let count (module Dict : DICT) list = ()
+(*let count (module Dict : DICT) list = ()*)
