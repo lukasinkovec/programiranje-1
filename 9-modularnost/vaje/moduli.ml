@@ -218,20 +218,51 @@ end
 module Polar : COMPLEX = struct
   type t = {magn : float; arg : float}
 
-  (* Pomožne funkcije za lažje življenje. *)
   let pi = 2. *. acos 0.
   let rad_of_deg deg = (deg /. 180.) *. pi
   let deg_of_rad rad = (rad /. pi) *. 180.
 
-  let eq x y = {magn = 0.; arg = 0.}
+  let rec convert x =
+    if x < 0. then
+      convert (x +. 360.)
+    else if x < 360. then
+      x
+    else
+      convert (x -. 360.)
+
+  let eq x y = (x.magn = y.magn) && ((convert x.arg) = (convert y.arg))
   let zero = {magn = 0.; arg = 0.}
   let one = {magn = 1.; arg = 0.}
-  let i = {magn = 1.; arg = pi / 2.}
-  let neg x = {magn = x.magn; arg = x.arg +. pi}
-  let con x = 
-    if x.arg > {magn = x.magn; arg = }
-  let add x y = {magn = 0.; arg = 0.} 
-  let mult x y = {magn = x.magn +. y.magn; arg = 0.}
+  let i = {magn = 1.; arg = 90.}
+  let neg x = {magn = x.magn; arg = convert (x.arg +. 180.)}
+  let con x = {magn = x.magn; arg = convert (-. x.arg)}
+
+  let add x y =
+    let r1 = x.magn in
+    let r2 = y.magn in
+    let fi1 = (convert x.arg) in
+    let fi2 = (convert y.arg) in
+    let r = (sqrt (r1 *. r1 +. r2 *. r2 +. 2. *. r1 *. r2 *. cos ((rad_of_deg fi2) -. (rad_of_deg fi1)))) in
+    let left = (r2 *. sin ((rad_of_deg fi2) -. (rad_of_deg fi1))) in
+    let right = (r1 +. r2 *. cos ((rad_of_deg fi2) -. (rad_of_deg fi1))) in
+    let final = (atan (left /. right)) in
+    if eq x zero then
+      y
+    else if eq y zero then
+      x
+    else if right > 0. then
+      {magn = r; arg = convert (fi1 +. (deg_of_rad final))}
+    else if right = 0. then
+      if left > 0. then
+        {magn = r; arg = convert (fi1 +. 90.)}
+      else 
+        {magn = r; arg = convert (fi1 -. 90.)}
+    else if left >= 0. then
+      {magn = r; arg = convert (fi1 +. (deg_of_rad final) +. 180.)}
+    else
+      {magn = r; arg = convert (fi1 +. (deg_of_rad final) -. 180.)}
+
+  let mult x y = {magn = x.magn *. y.magn; arg = convert (x.arg +. y.arg)}
 end
 
 (*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*]
@@ -248,6 +279,58 @@ end
  [print] (print naj ponovno deluje zgolj na [(string, int) t].
 [*----------------------------------------------------------------------------*)
 
+module type DICT = sig
+  type ('key, 'value) dict
+  type 'value option
+
+  val leaf_dict : 'key * 'value -> ('key, 'value) dict
+  val empty  : ('key, 'value) dict
+  val none   : 'value option
+  val vopt_v : 'value option -> 'value
+  val get    : 'key -> ('key, 'value) dict -> 'value option
+  val insert : 'key -> 'value -> ('key, 'value) dict -> ('key, 'value) dict
+  val print  : (string, int) dict -> unit
+end
+
+module Tree_dict : DICT = struct
+  type ('key, 'value) dict = Empty | Dict of ('key, 'value) dict * ('key * 'value) * ('key, 'value) dict
+  type 'value option = None | Some of 'value
+
+  let leaf_dict x = Dict (Empty, x, Empty)
+  let empty = Empty
+  let none = None
+  let vopt_v (Some x) = x
+
+  let rec get key = function
+    | Empty -> None
+    | Dict (ld, (k, v), rd) -> 
+      if key = k then
+        Some v
+      else if key > k then
+        get key rd
+      else
+        get key ld
+
+  let rec insert key value = function
+    | Empty -> leaf_dict (key, value)
+    | Dict (ld, (k, v), rd) -> 
+      if key = k then
+        Dict (ld, (k, value), rd)
+      else if key > k then
+        Dict (ld, (k, v), insert key value rd)
+      else
+        Dict (insert key value ld, (k, v), rd)
+
+  let rec print = function
+    | Empty -> ()
+    | Dict (ld, (k, v), rd) -> 
+      print ld;
+      print_string (k ^ " : ");
+      print_int v;
+      print_endline "";
+      print rd
+
+end
 
 (*----------------------------------------------------------------------------*]
  Funkcija [count (module Dict) list] prešteje in izpiše pojavitve posameznih
@@ -260,4 +343,14 @@ end
  - : unit = ()
 [*----------------------------------------------------------------------------*)
 
-(*let count (module Dict : DICT) list = ()*)
+let count (module Dict : DICT) list =
+  let rec count' acc = function
+    | [] -> acc
+    | x :: xs -> 
+      if (Dict.get x acc) = Dict.none then
+        let new_acc = (Dict.insert x 1 acc) in
+        count' new_acc xs
+      else
+        let new_acc = (Dict.insert x ((Dict.vopt_v (Dict.get x acc)) + 1) acc) in
+        count' new_acc xs
+  in Dict.print (count' Dict.empty list)
