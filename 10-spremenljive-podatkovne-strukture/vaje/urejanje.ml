@@ -12,11 +12,11 @@
 Random.self_init ();;
 
 let randlist len max = 
-  let rec randlist' acc max' = function
+  let rec randlist' acc m = function
   | 0 -> acc
   | x -> 
-    let new_acc = (Random.int (max' + 1)) :: acc in
-    randlist' new_acc max' (x - 1)
+    let new_acc = (Random.int (m + 1)) :: acc in
+    randlist' new_acc m (x - 1)
   in
   randlist' [] max len
 
@@ -57,16 +57,16 @@ let rec insert y = function
       x :: (insert y xs)
 
 let insert' y xs =
-  let rec insert'' acc y' = function
-    | [] -> acc @ [y']
+  let rec insert'' acc = function
+    | [] -> List.rev (y :: acc)
     | z :: zs ->
-      if y' < z then
-        acc @ (y' :: z :: zs)
+      if y < z then
+        (List.rev acc) @ (y :: z :: zs)
       else
         let new_acc = z :: acc in
-        insert'' new_acc y' zs
+        insert'' new_acc zs
   in
-  insert'' [] y xs
+  insert'' [] xs
 
 (*----------------------------------------------------------------------------*]
  Prazen seznam je že urejen. Funkcija [insert_sort] uredi seznam tako da
@@ -95,7 +95,7 @@ let insert_sort xs =
 type 'a option = None | Some of 'a
 
 let first = function
-  | [] -> 0
+  | [] -> failwith "This shouldn't happen!"
   | x :: _ -> x
 
 let rec del z = function
@@ -107,16 +107,16 @@ let rec del z = function
       x :: (del z xs)
 
 let del' z list =
-  let rec del'' acc z' = function
-    | [] -> acc
+  let rec del'' acc = function
+    | [] -> List.rev acc
     | x :: xs ->
-      if z' = x then
-        acc @ xs
+      if z = x then
+        (List.rev acc) @ xs
       else
         let new_acc = (x :: acc) in
-        del'' new_acc z' xs
+        del'' new_acc xs
   in
-  del'' [] z list
+  del'' [] list
 
 let min_and_rest = function
   | [] -> None
@@ -152,9 +152,9 @@ let selection_sort xs =
     | [] -> List.rev acc
     | list ->
       (match min_and_rest list with
-      | Some (y, ys) ->
-        let new_acc = (y :: acc) in
-        selection_sort' new_acc ys
+      | Some (z, list') ->
+        let new_acc = (z :: acc) in
+        selection_sort' new_acc list'
       | None -> failwith "This shouldn't happen!")
   in
   selection_sort' [] xs
@@ -200,7 +200,7 @@ let swap a i j =
 
 let index_min a lower upper =
   let acc = ref lower in
-  for i = lower to (upper + 1) do
+  for i = lower to upper do
     if a.(i) < a.(!acc) then
       acc := i
     else
@@ -217,9 +217,9 @@ let index_min a lower upper =
 
 let selection_sort_array array =
   let l = (Array.length array) in
-  for i = 0 to (l - 1) do
+  for i = 0 to (l - 2) do
     let m = (index_min array (i + 1) (l - 1)) in
-    if array.(i) < array.(m) then
+    if array.(m) < array.(i) then
       swap array i m
     else
       ()
