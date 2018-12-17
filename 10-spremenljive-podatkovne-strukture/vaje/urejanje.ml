@@ -9,6 +9,14 @@
  val l : int list = [0; 1; 0; 4; 0; 9; 1; 2; 5; 4]
 [*----------------------------------------------------------------------------*)
 
+let randlist len max = 
+  let rec randlist' acc max' = function
+  | 0 -> acc
+  | x -> 
+    let new_acc = (Random.int (max' + 1)) :: acc in
+    randlist' new_acc max' (x - 1)
+  in
+  randlist' [] max len
 
 (*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*]
  Sedaj lahko s pomočjo [randlist] primerjamo našo urejevalno funkcijo (imenovana
@@ -18,6 +26,9 @@
  let test = (randlist 100 100) in (our_sort test = List.sort compare test);;
 [*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*)
 
+let test_our_sort our_sort =
+  let test = (randlist 100 100) in
+  (our_sort test = List.sort compare test)
 
 (*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*]
  Urejanje z Vstavljanjem
@@ -35,13 +46,37 @@
  - : int list = [7]
 [*----------------------------------------------------------------------------*)
 
+let rec insert y = function
+  | [] -> [y]
+  | x :: xs -> 
+    if y < x then
+      y :: x :: xs    
+    else
+      x :: (insert y xs)
+
+let insert' y xs =
+  let rec insert'' acc y' = function
+    | [] - > acc @ y'
+    | z :: zs ->
+      if y' < z then
+        acc @ (y' :: z :: zs)
+      else
+        let new_acc = z :: acc in
+        insert'' new_acc y' zs
+  in insert'' [] y xs
 
 (*----------------------------------------------------------------------------*]
  Prazen seznam je že urejen. Funkcija [insert_sort] uredi seznam tako da
  zaporedoma vstavlja vse elemente seznama v prazen seznam.
 [*----------------------------------------------------------------------------*)
 
-
+let insert_sort xs =
+  let rec insert_sort' acc = function
+    | [] -> acc
+    | y :: ys ->
+      let new_acc = (insert y acc) in
+      insert_sort' new_acc ys
+  in insert_sort' [] xs
 
 (*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*]
  Urejanje z Izbiranjem
@@ -53,6 +88,40 @@
  pojavitvijo elementa [z]. V primeru praznega seznama vrne [None]. 
 [*----------------------------------------------------------------------------*)
 
+type 'a option = None | Some of 'a
+
+let first = function
+  | [] -> 0
+  | x :: _ -> x
+
+let rec del z = function
+  | [] -> []
+  | x :: xs -> 
+    if z = x then
+      xs    
+    else
+      x :: (del z xs)
+
+let del' z list =
+  let rec del'' acc z' = function
+    | [] -> acc
+    | x :: xs ->
+      if z' = x then
+        acc @ xs
+      else
+        let new_acc = (x :: acc) in
+        del'' new_acc z' xs
+  in del'' [] z list
+
+let min_and_rest = function
+  | [] -> None
+  | list ->
+    (let min_and_rest' acc list' = function
+      | [] -> Some (acc, (del acc list))
+      | x :: xs -> 
+        let new_acc = (min acc x) in
+        min_and_rest' new_acc xs
+    in min_and_rest' (first list) list)
 
 (*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*]
  Pri urejanju z izbiranjem na vsakem koraku ločimo dva podseznama, kjer je prvi
@@ -66,13 +135,23 @@
  dodati na konec urejenega podseznama.
  (Hitreje je obrniti vrstni red seznama kot na vsakem koraku uporabiti [@].)
 [*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*)
-
+List.rev
 (*----------------------------------------------------------------------------*]
  Funkcija [selection_sort] je implementacija zgoraj opisanega algoritma.
  Namig: Uporabi [min_and_rest] iz prejšnje naloge.
 [*----------------------------------------------------------------------------*)
 
-
+let selection_sort xs =
+  let rec selection_sort' acc = function
+    | [] -> acc
+    | list ->
+      (match min_and_rest list with
+      | Some (y, ys) ->
+        let new_acc = y :: acc
+      | None -> 
+        selection_sort' new_acc ys)
+  in
+  selection_sort' [] xs
 
 (*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*]
  Urejanje z Izbiranjem na Tabelah
