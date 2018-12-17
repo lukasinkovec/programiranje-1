@@ -9,6 +9,8 @@
  val l : int list = [0; 1; 0; 4; 0; 9; 1; 2; 5; 4]
 [*----------------------------------------------------------------------------*)
 
+Random.self_init ();;
+
 let randlist len max = 
   let rec randlist' acc max' = function
   | 0 -> acc
@@ -56,14 +58,15 @@ let rec insert y = function
 
 let insert' y xs =
   let rec insert'' acc y' = function
-    | [] - > acc @ y'
+    | [] -> acc @ [y']
     | z :: zs ->
       if y' < z then
         acc @ (y' :: z :: zs)
       else
         let new_acc = z :: acc in
         insert'' new_acc y' zs
-  in insert'' [] y xs
+  in
+  insert'' [] y xs
 
 (*----------------------------------------------------------------------------*]
  Prazen seznam je že urejen. Funkcija [insert_sort] uredi seznam tako da
@@ -76,7 +79,8 @@ let insert_sort xs =
     | y :: ys ->
       let new_acc = (insert y acc) in
       insert_sort' new_acc ys
-  in insert_sort' [] xs
+  in
+  insert_sort' [] xs
 
 (*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*]
  Urejanje z Izbiranjem
@@ -111,17 +115,19 @@ let del' z list =
       else
         let new_acc = (x :: acc) in
         del'' new_acc z' xs
-  in del'' [] z list
+  in
+  del'' [] z list
 
 let min_and_rest = function
   | [] -> None
   | list ->
-    (let min_and_rest' acc list' = function
+    (let rec min_and_rest' acc = function
       | [] -> Some (acc, (del acc list))
       | x :: xs -> 
         let new_acc = (min acc x) in
         min_and_rest' new_acc xs
-    in min_and_rest' (first list) list)
+    in
+    min_and_rest' (first list) list)
 
 (*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*]
  Pri urejanju z izbiranjem na vsakem koraku ločimo dva podseznama, kjer je prvi
@@ -135,7 +141,7 @@ let min_and_rest = function
  dodati na konec urejenega podseznama.
  (Hitreje je obrniti vrstni red seznama kot na vsakem koraku uporabiti [@].)
 [*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*)
-List.rev
+
 (*----------------------------------------------------------------------------*]
  Funkcija [selection_sort] je implementacija zgoraj opisanega algoritma.
  Namig: Uporabi [min_and_rest] iz prejšnje naloge.
@@ -143,13 +149,13 @@ List.rev
 
 let selection_sort xs =
   let rec selection_sort' acc = function
-    | [] -> acc
+    | [] -> List.rev acc
     | list ->
       (match min_and_rest list with
       | Some (y, ys) ->
-        let new_acc = y :: acc
-      | None -> 
-        selection_sort' new_acc ys)
+        let new_acc = (y :: acc) in
+        selection_sort' new_acc ys
+      | None -> failwith "This shouldn't happen!")
   in
   selection_sort' [] xs
 
@@ -180,6 +186,10 @@ let selection_sort xs =
  - : int array = [|0; 4; 2; 3; 1|]
 [*----------------------------------------------------------------------------*)
 
+let swap a i j =
+  let x = a.(i) in
+  a.(i) <- a.(j);
+  a.(j) <- x
 
 (*----------------------------------------------------------------------------*]
  Funkcija [index_min a lower upper] poišče indeks najmanjšega elementa tabele
@@ -188,6 +198,15 @@ let selection_sort xs =
  index_min [|0; 2; 9; 3; 6|] 2 4 = 4
 [*----------------------------------------------------------------------------*)
 
+let index_min a lower upper =
+  let acc = ref lower in
+  for i = lower to (upper + 1) do
+    if a.(i) < a.(!acc) then
+      acc := i
+    else
+      ()
+  done;
+  !acc
 
 (*----------------------------------------------------------------------------*]
  Funkcija [selection_sort_array] implementira urejanje z izbiranjem na mestu. 
@@ -196,3 +215,12 @@ let selection_sort xs =
  skupaj z [randlist].
 [*----------------------------------------------------------------------------*)
 
+let selection_sort_array array =
+  let l = (Array.length array) in
+  for i = 0 to (l - 1) do
+    let m = (index_min array (i + 1) (l - 1)) in
+    if array.(i) < array.(m) then
+      swap array i m
+    else
+      ()
+  done
