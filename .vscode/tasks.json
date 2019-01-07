@@ -10,6 +10,14 @@
             "problemMatcher": [
                 "$ocamlc"
             ]
+        },
+        {
+            "label": "Python",
+            "type": "shell",
+            "command": "python -i \\\"${file}\\\"",
+            "problemMatcher": [
+                "$ocamlc"
+            ]
         }
     ]
 }

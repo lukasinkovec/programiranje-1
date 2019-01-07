@@ -27,7 +27,37 @@
 #     [10, 2, 0, 4, 11, 15, 17, 5, 18]
 ##############################################################################
 
+def swap(list, i, j):
+    x = list[i]
+    list[i] = list[j]
+    list[j] = x
 
+def pivot(a, start, end):
+    p = a[start]
+    less = start + 1
+    more = start + 1
+    while more < end:
+        more = less
+        while a[less] < p:
+            less += 1
+            more += 1
+        while a[more] > p:
+            more += 1
+            if more == end:
+                if a[more] < p:
+                    swap(a, less, more)
+                    swap(a, start, less)
+                    return less
+                else:
+                    swap(a, start, less - 1)
+                    return less - 1
+        swap(a, less, more)
+        less += 1
+    swap(a, start, less)
+    return less
+
+#b = [10, 4, 5, 6, 7, 5, 4, 3, 8, 11]
+#pivot(b, 1, 9)
 
 ##############################################################################
 # Tabelo a želimo urediti z algoritmom hitrega urejanja (quicksort).
