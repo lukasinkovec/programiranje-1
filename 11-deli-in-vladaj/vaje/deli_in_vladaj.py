@@ -33,16 +33,17 @@ def swap(list, i, j):
     list[j] = x
 
 def pivot(a, start, end):
-    p = a[start]
-    less = start + 1
-    more = start + 1
-    while more < end:
-        more = less
-        while a[less] < p:
-            less += 1
-            more += 1
-        while a[more] > p:
-            more += 1
+    if len(a) == 1:
+        return 0
+    else:
+        p, less = a[start], start + 1
+        while True:
+            more = less
+            while (a[less] < p) and (more < end):
+                less += 1
+                more += 1
+            while (a[more] > p) and (more < end):
+                more += 1
             if more == end:
                 if a[more] < p:
                     swap(a, less, more)
@@ -51,13 +52,8 @@ def pivot(a, start, end):
                 else:
                     swap(a, start, less - 1)
                     return less - 1
-        swap(a, less, more)
-        less += 1
-    swap(a, start, less)
-    return less
-
-#b = [10, 4, 5, 6, 7, 5, 4, 3, 8, 11]
-#pivot(b, 1, 9)
+            swap(a, less, more)
+            less += 1
 
 ##############################################################################
 # Tabelo a želimo urediti z algoritmom hitrega urejanja (quicksort).
@@ -73,7 +69,17 @@ def pivot(a, start, end):
 #   [2, 3, 4, 5, 10, 11, 15, 17, 18]
 ##############################################################################
 
+def quicksort_part(a, start, end):
+    if start >= end:
+        return None
+    else:
+        x = pivot(a, start, end)
+        quicksort_part(a, start, x - 1)
+        quicksort_part(a, x + 1, end)
 
+def quicksort(a):
+    quicksort_part(a, 0, len(a) - 1)
+    return a
 
 ##############################################################################
 # V tabeli želimo poiskati vrednost k-tega elementa po velikosti.
@@ -89,3 +95,19 @@ def pivot(a, start, end):
 # element po velikosti. Funkcija sme spremeniti tabelo [a]. Cilj naloge je, da
 # jo rešite brez da v celoti uredite tabelo [a].
 ##############################################################################
+
+def kth_element_part(a, k, start, end):
+    if start >= end:
+        return None
+    else:
+        x = pivot(a, start, end)
+        if x == k:
+            return None
+        elif x > k:
+            kth_element_part(a, k, start, x - 1)
+        else:
+            kth_element_part(a, k, x + 1, end)
+
+def kth_element(a, k):
+    kth_element_part(a, k, 0, len(a) - 1)
+    return a[k]
