@@ -1,73 +1,67 @@
-let f1 list = 
+let f1 xs = 
   let rec f1' acc = function
     | [] -> acc
-    | x :: xs -> 
-      let new_acc = x + acc in
-      f1' new_acc xs
+    | y :: ys -> 
+      let new_acc = y + acc in
+      f1' new_acc ys
   in
-  f1' 0 list
+  f1' 0 xs
 
-let f2 list = 
-  let rec f2' acc = function
-    | [] -> true
-    | x :: xs -> 
-      if x >= acc then
-        let new_acc = x in
-        f1' new_acc xs
-      else
-        false
-  and first = function
-    | [] -> 0
-    | y :: _ -> y
-  in
-  f1' (first list) list
+let f2 = function
+  | [] -> true
+  | x :: xs ->
+    let rec f2' acc = function
+      | [] -> true
+      | y :: ys -> 
+        if y >= acc then
+          let new_acc = y in
+          f2' new_acc ys
+        else
+          false
+    in
+    f2' x (x :: xs)
 
-let f31 list =
+let f31 x xs =
   let rec f31' acc = function
-    | [] -> acc
-    | x :: xs -> 
-      let rec insert y list' =
-        if (f2 (y :: list')) then
-          y :: list'
-        else
-          (let first = function
-            | [] -> []
-            | z :: _ -> [z]
-          and rest = function
-            | [] -> []
-            | _ :: zs -> zs
-          in
-          first list' @ (insert y (rest list')
-          )
-      in
-      let new_acc = insert x acc in
-      f31' new_acc xs
+    | [] -> List.rev (x :: acc)
+    | y :: ys ->
+      if x < y then
+        (List.rev acc) @ (x :: y :: ys)
+      else  
+        let new_acc = y :: acc in
+        f31' new_acc ys
   in
-  f31' [] list
+  f31' [] xs
 
-let f32 x list = f31 (x :: list)
-
-let f4 cmp list =
-  let rec f4' acc = function
+let f32 xs =
+  let rec f32' acc = function
     | [] -> acc
-    | x :: xs -> 
-      let rec insert y list' =
-        let first = (function
-          | [] -> []
-          | z :: _ -> [z])
-        and rest = (function
-          | [] -> []
-          | _ :: zs -> zs)
-        in
-        if (cmp y (first list')) then
-          y :: list'
-        else
-          first list' @ (insert y (rest list'))
-      in
-      let new_acc = insert x acc in
-      f4' new_acc xs
+    | y :: ys -> 
+      let new_acc = f31 y acc in
+      f32' new_acc ys
   in
-  f4' [] list
+  f32' [] xs
+
+let f41 cmp x xs =
+  let rec f41' acc = function
+    | [] -> List.rev (x :: acc)
+    | y :: ys ->
+      if (cmp x y) then
+        (List.rev acc) @ (x :: y :: ys)
+      else  
+        let new_acc = y :: acc in
+        f41' new_acc ys
+  in
+  f41' [] xs
+    
+let f42 cmp xs =
+  let rec f42' acc = function
+    | [] -> acc
+    | y :: ys -> 
+      let new_acc = (f41 cmp y acc) in
+      f42' new_acc ys
+  in
+  f42' [] xs
 
 type priority =
   | Top
