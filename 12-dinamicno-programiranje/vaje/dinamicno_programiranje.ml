@@ -66,6 +66,8 @@ let max_cheese2 cheese_matrix = function
     let memoised_max_cheese = memoiziraj_rec max_cheese' in
     memoised_max_cheese (0, 0)
 
+
+
 (*----------------------------------------------------------------------------*]
  Rešujemo problem sestavljanja alternirajoče obarvanih stolpov. Imamo štiri
  različne tipe gradnikov, dva modra in dva rdeča. Modri gradniki so višin 2 in
