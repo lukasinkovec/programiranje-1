@@ -18,28 +18,26 @@
 
 from functools import lru_cache
 
-test_matrix = [[1, 2, 0], [2, 4, 5], [7, 0, 1]]
+test_matrix = [
+    [1, 2, 0],
+    [2, 4, 5],
+    [7, 0, 1]
+              ]
 
-@lru_cache(maxsize=None)
 def max_cheese(cheese_matrix):
     if cheese_matrix == []:
         return 0
     else:
         m = len(cheese_matrix)
         n = len(cheese_matrix[0])
-        aux_cheese_matrix = []
-        for x in range(m):
-          string = ""
-          for y in range(n):
-            string += (str(cheese_matrix[x][y]))
-          aux_cheese_matrix.append(string)
+        @lru_cache(maxsize=None)
         def aux_max_cheese(i, j):
             if (i >= m) or (j >= n):
                 return 0
             else:
                 right = aux_max_cheese(i, j + 1)
                 down = aux_max_cheese(i + 1, j)
-                cheese = int(aux_cheese_matrix[i][j])
+                cheese = cheese_matrix[i][j]
                 return cheese + max(right, down)
         return aux_max_cheese(0, 0)
 
@@ -109,6 +107,29 @@ def max_cheese(cheese_matrix):
 # - : int = 35
 #[*----------------------------------------------------------------------------*)
 
+@lru_cache(maxsize=None)
+def red(x):
+    if x < 0:
+        return 0
+    elif x <= 1:
+        return 1
+    else:
+        return blue(x - 1) + blue(x - 2)
+
+@lru_cache(maxsize=None)
+def blue(x):
+    if x < 0:
+        return 0
+    elif x == 0:
+        return 1
+    else:
+        return red(x - 2) + red(x - 3)
+
+def alternating_towers(x):
+    if x == 0:
+        return 1
+    else:
+        return red(x) + blue(x)
 
 #(*----------------------------------------------------------------------------*]
 # Na nagradni igri ste zadeli kupon, ki vam omogoča, da v Mercatorju kupite
@@ -140,3 +161,16 @@ def max_cheese(cheese_matrix):
 #  ("Nutella", 4.99, 0.75);
 #  ("juice", 1.15, 2.0)
 #|]
+
+articles = [
+    ("yoghurt", 0.39, 0.18),
+    ("milk", 0.89, 1.03),
+    ("coffee", 2.19, 0.2),
+    ("butter", 1.49, 0.25),
+    ("yeast", 0.22, 0.042),
+    ("eggs", 2.39, 0.69),
+    ("sausage", 3.76, 0.50),
+    ("bread", 2.99, 1.0),
+    ("Nutella", 4.99, 0.75),
+    ("juice", 1.15, 2.0)
+           ]
