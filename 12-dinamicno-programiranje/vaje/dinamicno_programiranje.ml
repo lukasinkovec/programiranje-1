@@ -21,6 +21,51 @@ let test_matrix =
      [| 2 ; 4 ; 5 |];
      [| 7 ; 0 ; 1 |] |]
 
+let memoiziraj_rec odviti_f =
+  let rezultati = Hashtbl.create 512 in
+  let rec mem_f x =
+    if Hashtbl.mem rezultati x then
+      Hashtbl.find rezultati x
+    else
+      let y = odviti_f mem_f x in
+      Hashtbl.add rezultati x y;
+      y
+  in
+  mem_f
+
+let max_cheese1 cheese_matrix = function
+  | [| |] -> 0
+  | cheese_matrix -> 
+    let v = Array.length cheese_matrix in
+    let s = Array.length cheese_matrix.(0) in
+    let rec max_cheese' i j =
+      if i >= v || j >= s then
+        0
+      else
+        let right = max_cheese' i (j + 1) in
+        let down = max_cheese' (i + 1) j in
+        let cheese = cheese_matrix.(i).(j) in
+        cheese + max right down
+    in
+    max_cheese' 0 0
+
+let max_cheese2 cheese_matrix = function
+  | [| |] -> 0
+  | cheese_matrix -> 
+    let v = Array.length cheese_matrix in
+    let s = Array.length cheese_matrix.(0) in
+    let max_cheese' recursive_max_cheese' (i, j) =
+      if i >= v || j >= s then
+        0
+      else
+        let right = recursive_max_cheese' (i, (j + 1)) in
+        let down = recursive_max_cheese' ((i + 1), j) in
+        let cheese = cheese_matrix.(i).(j) in
+        cheese + max right down
+    in
+    let memoised_max_cheese = memoiziraj_rec max_cheese' in
+    memoised_max_cheese (0, 0)
+
 (*----------------------------------------------------------------------------*]
  Rešujemo problem sestavljanja alternirajoče obarvanih stolpov. Imamo štiri
  različne tipe gradnikov, dva modra in dva rdeča. Modri gradniki so višin 2 in
