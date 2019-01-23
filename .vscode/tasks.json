@@ -22,7 +22,7 @@
         {
             "label": "run jupyter",
             "type": "shell",
-            "command": "jupyter",
+            "command": "jupyter notebook",
             "problemMatcher": [
                 "$ocamlc"
             ]
