@@ -18,6 +18,14 @@
             "problemMatcher": [
                 "$ocamlc"
             ]
+        },
+        {
+            "label": "run jupyter",
+            "type": "shell",
+            "command": "jupyter",
+            "problemMatcher": [
+                "$ocamlc"
+            ]
         }
     ]
 }
