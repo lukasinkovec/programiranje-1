@@ -17,22 +17,4 @@ Za vsakega igralca bom zajel njegov/-o:
 Delovne hipoteze:
 * Kateri od trenutno igralno aktivnih košarkarjev lige NBA, so najboljši glede na svojo karierno statistiko, po posameznem igralnem položaju?
 * Kakšna je povezava med višino in težo nekega igralca ter njegovo karierno statistiko?
-* Ali obstaja povezava med državo, iz katere nek igralec prihaja, in pa njegovo letnico rojstva ali njegovim igralnim položajem?
-
-
-
-
-drzave_po_letih = nba[['drzava', 'leto']].groupby('drzava').mean()
-drzave_po_letih['leto'] = (drzave_po_letih.leto // 1) + round(drzave_po_letih.leto % 1)
-drzave_po_letih[drzave_po_letih.leto == 1991.0]
-drzave_po_letih.loc["Slovenia"]
-
-polozaj_po_letih = nba[['polozaj', 'leto']].groupby('polozaj').mean()
-polozaj_po_letih['leto'] = (polozaj_po_letih.leto // 1) + round(polozaj_po_letih.leto % 1)
-
-
-nov_nba = nba[['tocke', 'zaokrozene visine', 'zaokrozene teze']]
-tocke_po_visinah = nov_nba.groupby('zaokrozene visine').mean()
-tocke_po_visinah['tocke'].plot()
-tocke_po_tezah = nov_nba.groupby('zaokrozene teze').mean()
-tocke_po_tezah['tocke'].plot()
+* Ali obstaja povezava med letnico rojstva nekega igralca in pa državo, iz katere ta isti igralec prihaja ali pa njegovim igralnim položajem?
