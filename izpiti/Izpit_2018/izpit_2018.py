@@ -12,3 +12,15 @@ def najmanj_skokov(mocvara, energija=0):
     else:
         energija += mocvara[0]
         return min([(1 + najmanj_skokov(mocvara[(skok + 1):], (energija - skok - 1))) for skok in range(energija)])
+
+def tl_rec_najmanj_skokov(mocvara):
+    dolzina = len(mocvara)
+    @lru_cache(maxsize=None)
+    def aux(pomozna_dolzina, energija=0):
+        pomozna_mocvara = mocvara[(dolzina - pomozna_dolzina):]
+        if pomozna_mocvara == []:
+            return 0
+        else:
+            energija += pomozna_mocvara[0]
+            return min([(1 + aux((pomozna_dolzina - skok - 1), (energija - skok - 1))) for skok in range(energija)])
+    return aux(dolzina, 0)
